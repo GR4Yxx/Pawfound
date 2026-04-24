@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx vue-tsc --noEmit)",
+      "Bash(./node_modules/.bin/vue-tsc --noEmit)",
+      "Bash(docker compose up -d --no-build backend)",
+      "Bash(grep -E \"\\\\.\\(py|yml|yaml|json\\)$\")",
+      "Bash(npm install:*)",
+      "Bash(npm --version)",
+      "Bash(npx shadcn-vue@latest init --yes)",
+      "Bash(docker compose *)"
+    ]
+  }
+}

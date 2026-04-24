@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#815100"/>
+      <stop offset="100%" stop-color="#f8a010"/>
+    </linearGradient>
+  </defs>
+  <!-- palm pad -->
+  <ellipse cx="32" cy="42" rx="14" ry="12" fill="url(#g)"/>
+  <!-- top left toe -->
+  <ellipse cx="14" cy="28" rx="6" ry="8" fill="url(#g)"/>
+  <!-- top left-center toe -->
+  <ellipse cx="24" cy="22" rx="6" ry="8" fill="url(#g)"/>
+  <!-- top right-center toe -->
+  <ellipse cx="40" cy="22" rx="6" ry="8" fill="url(#g)"/>
+  <!-- top right toe -->
+  <ellipse cx="50" cy="28" rx="6" ry="8" fill="url(#g)"/>
+</svg>

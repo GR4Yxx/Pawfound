@@ -1,0 +1,367 @@
+@layer tailwind-base, primevue, tailwind-utilities;
+
+@layer tailwind-base {
+  @tailwind base;
+}
+
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
+
+@layer tailwind-base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: #fff5ea;
+    color: #402b00;
+    font-family: 'Be Vietnam Pro', sans-serif;
+  }
+}
+
+/* ── Icons ─────────────────────────────────── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+
+/* ── Brand gradient ─────────────────────────── */
+.editorial-gradient,
+.btn-primary {
+  background: linear-gradient(135deg, #815100 0%, #f8a010 100%);
+}
+
+/* ── Card system ────────────────────────────── */
+.card {
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px rgba(64,43,0,0.06), 0 4px 16px rgba(64,43,0,0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card-hover {
+  cursor: pointer;
+}
+
+.card-hover:hover {
+  box-shadow: 0 4px 12px rgba(64,43,0,0.10), 0 12px 40px rgba(64,43,0,0.10);
+  transform: translateY(-2px);
+}
+
+.card-raised {
+  box-shadow: 0 8px 24px rgba(64,43,0,0.12), 0 24px 64px rgba(64,43,0,0.10);
+}
+
+/* ── Button system ──────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  border-radius: 9999px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: none;
+  outline: none;
+  white-space: nowrap;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(248,160,16,0.40);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-primary {
+  color: #fff0e3;
+  padding: 0.875rem 2rem;
+  font-size: 0.9375rem;
+  box-shadow: 0 2px 8px rgba(129,81,0,0.30), 0 1px 2px rgba(129,81,0,0.20);
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 4px 16px rgba(129,81,0,0.40), 0 2px 4px rgba(129,81,0,0.20);
+  transform: translateY(-1px) scale(1.01);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 1px 4px rgba(129,81,0,0.20);
+}
+
+.btn-secondary {
+  background: #ffeed8;
+  color: #402b00;
+  padding: 0.875rem 2rem;
+  font-size: 0.9375rem;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: #ffdeaa;
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: #735722;
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: #ffeed8;
+  color: #402b00;
+}
+
+.btn-sm {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.8125rem;
+}
+
+.btn-icon {
+  padding: 0.625rem;
+  border-radius: 9999px;
+}
+
+/* ── Input system ───────────────────────────── */
+.input {
+  width: 100%;
+  background: #ffdeaa;
+  border: 1.5px solid transparent;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1rem;
+  font-size: 0.9375rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  color: #402b00;
+  transition: all 0.15s ease;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(64,43,0,0.06);
+}
+
+.input::placeholder {
+  color: rgba(115,87,34,0.45);
+}
+
+.input:hover {
+  background: #ffd796;
+  border-color: rgba(204,168,107,0.4);
+}
+
+.input:focus {
+  background: #ffffff;
+  border-color: #f8a010;
+  box-shadow: 0 0 0 3px rgba(248,160,16,0.15), inset 0 1px 2px rgba(64,43,0,0.04);
+}
+
+.select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23735722' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+/* ── Badge system ───────────────────────────── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+}
+
+.badge-lost {
+  background: #f95630;
+  color: #520c00;
+}
+
+.badge-found {
+  background: #faec55;
+  color: #5d5600;
+}
+
+.badge-reunited {
+  background: #d4edda;
+  color: #1a6630;
+}
+
+/* ── Skeleton shimmer ───────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, #ffe5bd 0%, #ffeed8 50%, #ffe5bd 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+  border-radius: 0.5rem;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Page transitions ───────────────────────── */
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+/* ── Scroll reveal stagger ──────────────────── */
+.stagger-1 { animation: fade-up 0.4s 0.05s ease-out both; }
+.stagger-2 { animation: fade-up 0.4s 0.10s ease-out both; }
+.stagger-3 { animation: fade-up 0.4s 0.15s ease-out both; }
+.stagger-4 { animation: fade-up 0.4s 0.20s ease-out both; }
+.stagger-5 { animation: fade-up 0.4s 0.25s ease-out both; }
+.stagger-6 { animation: fade-up 0.4s 0.30s ease-out both; }
+
+@keyframes fade-up {
+  0% { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes scale-in {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* ── Glass effect ───────────────────────────── */
+.glass {
+  background: rgba(255, 245, 234, 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+}
+
+/* ── Gradient text ──────────────────────────── */
+.text-gradient {
+  background: linear-gradient(135deg, #815100 0%, #f8a010 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Divider ────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #ffe5bd, transparent);
+  border: none;
+  margin: 0;
+}
+
+/* ── Focus ring ─────────────────────────────── */
+*:focus-visible {
+  outline: 2px solid #f8a010;
+  outline-offset: 2px;
+}
+
+/* ── Scrollbar ──────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #ffeed8;
+}
+::-webkit-scrollbar-thumb {
+  background: #cca86b;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #91723b;
+}
+
+/* ── Selection ──────────────────────────────── */
+::selection {
+  background: #f8a010;
+  color: #fff0e3;
+}
+
+/* ── Image treatments ───────────────────────── */
+.img-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── Surface elevation ──────────────────────── */
+.surface-1 { background: #ffffff; }
+.surface-2 { background: #fff5ea; }
+.surface-3 { background: #ffeed8; }
+.surface-4 { background: #ffe5bd; }
+.surface-5 { background: #ffdeaa; }
+
+/* ── Pulse ring animation ───────────────────── */
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(248,160,16,0.4), 0 8px 24px rgba(64,43,0,0.12); }
+  50% { box-shadow: 0 0 0 10px rgba(248,160,16,0), 0 8px 24px rgba(64,43,0,0.12); }
+}
+.animate-pulse-ring {
+  animation: pulse-ring 2.5s ease-in-out infinite;
+}
+
+/* ── Spin slow ───────────────────────────────── */
+.animate-spin-slow {
+  animation: spin-slow 0.8s linear infinite;
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ── Tonal fill button (outlined variant) ───── */
+.btn-tonal {
+  background: #ffeed8;
+  color: #815100;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  border-radius: 9999px;
+  border: 1.5px solid rgba(204,168,107,0.5);
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.btn-tonal:hover:not(:disabled) {
+  background: #ffdeaa;
+  border-color: #cca86b;
+  transform: translateY(-1px);
+}

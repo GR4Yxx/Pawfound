@@ -1,0 +1,28 @@
+# Dataset (large binary files — ~750MB, download via make dataset)
+/trainer/data/
+
+# Model weights (large binary — distribute separately)
+/trainer/dog_model.pth
+/backend/dog_model.pth
+
+# Local test images
+/trainer/test_images/*.jpg
+/trainer/test_images/*.png
+/trainer/test_images/*.jpeg
+
+# Local env — never commit secrets
+.env
+
+# ChromaDB local storage
+/chroma_data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pth
+.venv/
+venv/
+
+# Node
+frontend/node_modules/
+frontend/dist/
