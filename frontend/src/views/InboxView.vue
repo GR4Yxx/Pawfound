@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
-import { getInbox, getThread } from "@/api";
+import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import { getInbox, getThread, sendMessage } from "@/api";
 import { useInboxStore } from "@/stores/inbox";
 import type { MessageThread, MessageItem } from "@/types";
 import NavBar from "@/components/NavBar.vue";
@@ -14,6 +14,15 @@ const selectedDogName = ref("");
 const threadMessages = ref<MessageItem[]>([]);
 const inboxLoading = ref(true);
 const threadLoading = ref(false);
+
+const composeBody = ref("");
+const composeImage = ref<File | null>(null);
+const composeImagePreview = ref<string | null>(null);
+const sending = ref(false);
+const sendError = ref("");
+const messagesEl = ref<HTMLElement | null>(null);
+const fileInputEl = ref<HTMLInputElement | null>(null);
+
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 
 onMounted(async () => {
@@ -48,6 +57,8 @@ async function loadThread(dogId: string) {
     const thread = threads.value.find((t) => t.dog_id === dogId);
     if (thread) thread.unread_count = 0;
     inboxStore.refresh();
+    await nextTick();
+    scrollToBottom();
   } catch {
     // silent
   } finally {
@@ -57,7 +68,66 @@ async function loadThread(dogId: string) {
 
 async function selectThread(t: MessageThread) {
   selectedDogId.value = t.dog_id;
+  composeBody.value = "";
+  composeImage.value = null;
+  composeImagePreview.value = null;
+  sendError.value = "";
   await loadThread(t.dog_id);
+}
+
+function scrollToBottom() {
+  if (messagesEl.value) {
+    messagesEl.value.scrollTop = messagesEl.value.scrollHeight;
+  }
+}
+
+function onFileChange(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0] ?? null;
+  attachImage(file);
+}
+
+function attachImage(file: File | null) {
+  if (!file) return;
+  composeImage.value = file;
+  const reader = new FileReader();
+  reader.onload = (e) => { composeImagePreview.value = e.target?.result as string; };
+  reader.readAsDataURL(file);
+}
+
+function removeAttachment() {
+  composeImage.value = null;
+  composeImagePreview.value = null;
+  if (fileInputEl.value) fileInputEl.value.value = "";
+}
+
+async function submit() {
+  if (!selectedDogId.value) return;
+  if (!composeBody.value.trim() && !composeImage.value) return;
+  sending.value = true;
+  sendError.value = "";
+  try {
+    await sendMessage(selectedDogId.value, composeBody.value.trim(), composeImage.value ?? undefined);
+    composeBody.value = "";
+    composeImage.value = null;
+    composeImagePreview.value = null;
+    if (fileInputEl.value) fileInputEl.value.value = "";
+    await loadThread(selectedDogId.value);
+  } catch (err: unknown) {
+    sendError.value = err instanceof Error ? err.message : "Failed to send message.";
+  } finally {
+    sending.value = false;
+  }
+}
+
+function onKeydown(e: KeyboardEvent) {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    submit();
+  }
+}
+
+function openImage(b64: string, contentType = "image/jpeg") {
+  window.open(`data:${contentType};base64,${b64}`, "_blank");
 }
 
 function matchAlertText(body: string): string {
@@ -181,7 +251,7 @@ function formatTime(iso: string) {
             </div>
 
             <!-- Messages -->
-            <div class="flex-1 overflow-y-auto p-5 space-y-3 min-h-0">
+            <div ref="messagesEl" class="flex-1 overflow-y-auto p-5 space-y-3 min-h-0">
               <!-- Loading -->
               <div v-if="threadLoading" class="space-y-4">
                 <div v-for="i in 3" :key="i" class="flex animate-pulse" :class="i % 2 === 0 ? 'justify-end' : ''">
@@ -193,7 +263,7 @@ function formatTime(iso: string) {
               <template v-else v-for="msg in threadMessages" :key="msg.message_id">
 
                 <!-- System match alert -->
-                <div v-if="msg.is_system" class="flex justify-center">
+                <div v-if="msg.is_system" class="flex justify-start">
                   <div class="w-full max-w-sm bg-surface-container border border-outline-variant/30 rounded-2xl px-4 py-4 shadow-sm">
                     <div class="flex items-center gap-2 mb-2">
                       <div class="w-6 h-6 editorial-gradient rounded-lg flex items-center justify-center shrink-0">
@@ -227,7 +297,13 @@ function formatTime(iso: string) {
                       : 'bg-surface-container text-on-surface rounded-2xl rounded-bl-sm'"
                   >
                     <p v-if="!msg.is_mine" class="text-[0.65rem] font-bold text-on-surface-variant mb-1 uppercase tracking-wide">{{ msg.sender_name }}</p>
-                    <p class="text-sm leading-relaxed">{{ msg.body }}</p>
+                    <p v-if="msg.body" class="text-sm leading-relaxed">{{ msg.body }}</p>
+                    <img
+                      v-if="msg.image_b64"
+                      :src="`data:${msg.image_content_type || 'image/jpeg'};base64,${msg.image_b64}`"
+                      class="mt-2 rounded-xl max-w-[220px] max-h-[220px] object-cover cursor-pointer"
+                      @click="openImage(msg.image_b64!, msg.image_content_type || 'image/jpeg')"
+                    />
                     <p class="text-[0.6rem] mt-1.5 opacity-50 text-right">{{ formatTime(msg.created_at) }}</p>
                   </div>
                 </div>
@@ -238,6 +314,56 @@ function formatTime(iso: string) {
                 <span class="material-symbols-outlined text-3xl block mb-2">chat_bubble_outline</span>
                 <p class="text-sm">No messages in this thread yet.</p>
               </div>
+            </div>
+
+            <!-- Compose box -->
+            <div class="border-t border-surface-container p-3 shrink-0">
+              <!-- Image attachment preview -->
+              <div v-if="composeImagePreview" class="mb-2 relative inline-block">
+                <img :src="composeImagePreview" class="h-20 w-20 object-cover rounded-xl border border-outline-variant/40" />
+                <button
+                  @click="removeAttachment"
+                  class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-error text-white rounded-full flex items-center justify-center shadow"
+                  type="button"
+                >
+                  <span class="material-symbols-outlined text-[10px]">close</span>
+                </button>
+              </div>
+
+              <div class="flex items-end gap-2">
+                <!-- Image attach button -->
+                <button
+                  type="button"
+                  @click="fileInputEl?.click()"
+                  class="shrink-0 w-9 h-9 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-container transition-colors"
+                  title="Attach image"
+                >
+                  <span class="material-symbols-outlined text-lg">attach_file</span>
+                </button>
+                <input ref="fileInputEl" type="file" accept="image/*" class="hidden" @change="onFileChange" />
+
+                <!-- Text input -->
+                <textarea
+                  v-model="composeBody"
+                  @keydown="onKeydown"
+                  rows="1"
+                  placeholder="Type a message… (Enter to send, Shift+Enter for newline)"
+                  class="flex-1 resize-none bg-surface-container rounded-2xl px-4 py-2.5 text-sm text-on-surface placeholder:text-on-surface-variant outline-none focus:ring-2 focus:ring-primary/40 min-h-[40px] max-h-32"
+                ></textarea>
+
+                <!-- Send button -->
+                <button
+                  type="button"
+                  @click="submit"
+                  :disabled="sending || (!composeBody.trim() && !composeImage)"
+                  class="shrink-0 w-9 h-9 flex items-center justify-center rounded-xl editorial-gradient text-on-primary shadow-sm disabled:opacity-40 transition-opacity"
+                  title="Send"
+                >
+                  <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1;">send</span>
+                </button>
+              </div>
+
+              <p v-if="sendError" class="text-xs text-error mt-1.5 px-1">{{ sendError }}</p>
             </div>
           </template>
 

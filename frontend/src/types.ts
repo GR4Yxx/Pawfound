@@ -64,6 +64,8 @@ export interface MessageItem {
   sender_id: string;
   sender_name: string;
   body: string;
+  image_b64: string | null;
+  image_content_type: string | null;
   created_at: string;
   read: boolean;
   is_mine: boolean;

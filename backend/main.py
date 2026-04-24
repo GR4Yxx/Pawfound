@@ -23,9 +23,9 @@ load_dotenv()
 _CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")]
 _CHROMA_PATH = os.getenv("CHROMA_PATH", "/chroma_data")
 # Minimum cosine similarity (0–1) for a result to appear in /match responses
-SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.45"))
+SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.70"))
 # Minimum cosine similarity to trigger an automatic inbox notification
-NOTIFY_THRESHOLD = float(os.getenv("NOTIFY_THRESHOLD", "0.70"))
+NOTIFY_THRESHOLD = float(os.getenv("NOTIFY_THRESHOLD", "0.60"))
 
 # SMTP config (all optional — notifications silently skipped if SMTP_HOST is empty)
 SMTP_HOST = os.getenv("SMTP_HOST", "")
@@ -168,7 +168,7 @@ def _notify_potential_matches(new_dog_id: str, new_dog_name: str, new_lost_or_fo
 
             # Each photo has its own chroma entry; deduplicate notifications by dog_id
             matched_dog_id = meta.get("dog_id", "")
-            if not matched_dog_id or matched_dog_id in notified_dog_ids:
+            if not matched_dog_id or matched_dog_id == new_dog_id or matched_dog_id in notified_dog_ids:
                 continue
             notified_dog_ids.add(matched_dog_id)
 
@@ -570,13 +570,23 @@ async def get_my_dogs(request: Request, current_user: dict = Depends(get_current
 async def send_message(
     dog_id: str = Form(...),
     body: str = Form(...),
+    image: Optional[UploadFile] = File(None),
     current_user: dict = Depends(get_current_user),
 ):
     body = body.strip()
-    if not body:
-        raise HTTPException(status_code=422, detail="Message body cannot be empty")
+    if not body and image is None:
+        raise HTTPException(status_code=422, detail="Message must have a body or an image")
     if len(body) > 2000:
         raise HTTPException(status_code=422, detail="Message body too long (max 2000 chars)")
+
+    image_b64: Optional[str] = None
+    image_content_type: Optional[str] = None
+    if image is not None:
+        img_bytes = await image.read()
+        if len(img_bytes) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=413, detail="Image too large (max 5 MB)")
+        image_b64 = base64.b64encode(img_bytes).decode("utf-8")
+        image_content_type = image.content_type or "image/jpeg"
 
     user_uuid = uuid.UUID(current_user["sub"])
     db = SessionLocal()
@@ -587,7 +597,7 @@ async def send_message(
         if dog.user_id == user_uuid:
             raise HTTPException(status_code=400, detail="You cannot message yourself")
 
-        msg = Message(sender_id=user_uuid, dog_id=dog.id, body=body)
+        msg = Message(sender_id=user_uuid, dog_id=dog.id, body=body, image_b64=image_b64, image_content_type=image_content_type)
         db.add(msg)
         db.commit()
         db.refresh(msg)
@@ -694,6 +704,8 @@ async def get_thread(dog_id: str, current_user: dict = Depends(get_current_user)
                 "sender_id": sender_id_str,
                 "sender_name": sender_name,
                 "body": msg.body,
+                "image_b64": msg.image_b64,
+                "image_content_type": msg.image_content_type,
                 "created_at": msg.created_at.isoformat(),
                 "read": msg.read,
                 "is_system": msg.is_system,

@@ -74,10 +74,12 @@ export async function updateDogStatus(
 export async function sendMessage(
   dogId: string,
   body: string,
+  image?: File,
 ): Promise<{ message_id: string; created_at: string }> {
   const form = new FormData();
   form.append("dog_id", dogId);
   form.append("body", body);
+  if (image) form.append("image", image);
   const res = await fetch(`${BASE}/messages`, {
     method: "POST",
     body: form,

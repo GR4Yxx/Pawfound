@@ -77,6 +77,8 @@ class Message(Base):
     sender_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
     dog_id = Column(UUID(as_uuid=True), ForeignKey("dogs.id"), nullable=False)
     body = Column(Text, nullable=False)
+    image_b64 = Column(Text, nullable=True)
+    image_content_type = Column(String(50), nullable=True)
     read = Column(Boolean, nullable=False, default=False)
     is_system = Column(Boolean, nullable=False, default=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
